@@ -139,15 +139,14 @@ export default function CoinTracker() {
     setFetching(true);
     setFetchMsg("");
     try {
-      const res = await fetch("https://api.metals.live/v1/spot");
-      const data = await res.json();
-      let silver = null, gold = null;
-      for (const m of data) {
-        if (m.gold) gold = m.gold;
-        if (m.silver) silver = m.silver;
-      }
-      if (silver && gold) {
-        setSpots({ silver, gold, lastUpdated: new Date().toLocaleString() });
+      const [goldRes, silverRes] = await Promise.all([
+        fetch("https://api.gold-api.com/price/XAU"),
+        fetch("https://api.gold-api.com/price/XAG"),
+      ]);
+      const goldData = await goldRes.json();
+      const silverData = await silverRes.json();
+      if (goldData.price && silverData.price) {
+        setSpots({ gold: goldData.price, silver: silverData.price, lastUpdated: new Date().toLocaleString() });
         setFetchMsg("Prices updated");
       } else {
         setFetchMsg("Partial data — check values");
